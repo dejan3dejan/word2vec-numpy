@@ -181,3 +181,105 @@ def evaluate_analogy(
     ]
     
     return top_words
+
+def train_streaming(
+    model: SkipGramNegativeSampling,
+    corpus: List[str],
+    word_to_idx: dict,
+    window_size: int = 2,
+    epochs: int = 100,
+    learning_rate: float = 0.1,
+    batch_size: int = 512,
+    verbose: bool = True
+) -> List[float]:
+    """
+    Train word2vec model using streaming pairs with mini-batch gradient accumulation.
+    
+    Args:
+        model: SkipGramNegativeSampling instance
+        corpus: List of sentences
+        word_to_idx: Word to index mapping
+        window_size: Context window size
+        epochs: Number of training epochs
+        learning_rate: Learning rate for SGD
+        batch_size: Number of pairs to accumulate before update
+        verbose: Print progress during training
+    
+    Returns:
+        losses: List of average loss per epoch
+    """
+    from .data import stream_training_pairs, count_training_pairs
+    
+    if verbose:
+        print("Counting training pairs...")
+        total_pairs = count_training_pairs(corpus, word_to_idx, window_size)
+        print(f"   Total pairs: {total_pairs:,}")
+    
+    losses = []
+    
+    iterator = range(epochs)
+    if verbose:
+        iterator = tqdm(iterator, desc="Training")
+    
+    for epoch in iterator:
+        epoch_loss = 0.0
+        pair_count = 0
+        
+        pair_generator = stream_training_pairs(corpus, word_to_idx, window_size, shuffle=True)
+        
+        if verbose:
+            pair_generator = tqdm(
+                pair_generator, 
+                total=total_pairs, 
+                desc=f"Epoch {epoch+1}/{epochs}",
+                leave=False
+            )
+        
+        grad_in_accumulator = {}
+        grad_out_accumulator = {}
+        batch_count = 0
+        
+        for center_idx, context_idx in pair_generator:
+            loss, cache = model.forward(center_idx, context_idx)
+            epoch_loss += loss
+            pair_count += 1
+            
+            (indices_in, dW_in), (indices_out, dW_out) = model.backward(cache)
+            
+            for idx, grad in zip(indices_in, dW_in):
+                if idx not in grad_in_accumulator:
+                    grad_in_accumulator[idx] = np.zeros_like(grad)
+                grad_in_accumulator[idx] += grad
+            
+            for idx, grad in zip(indices_out, dW_out):
+                if idx not in grad_out_accumulator:
+                    grad_out_accumulator[idx] = np.zeros_like(grad)
+                grad_out_accumulator[idx] += grad
+            
+            batch_count += 1
+            
+            if batch_count >= batch_size:
+                for idx, grad in grad_in_accumulator.items():
+                    model.W_in[idx] -= learning_rate * (grad / batch_count)
+                
+                for idx, grad in grad_out_accumulator.items():
+                    model.W_out[idx] -= learning_rate * (grad / batch_count)
+                
+                grad_in_accumulator.clear()
+                grad_out_accumulator.clear()
+                batch_count = 0
+        
+        if batch_count > 0:
+            for idx, grad in grad_in_accumulator.items():
+                model.W_in[idx] -= learning_rate * (grad / batch_count)
+            
+            for idx, grad in grad_out_accumulator.items():
+                model.W_out[idx] -= learning_rate * (grad / batch_count)
+        
+        avg_loss = epoch_loss / pair_count
+        losses.append(avg_loss)
+        
+        if verbose and isinstance(iterator, tqdm):
+            iterator.set_postfix({'loss': f'{avg_loss:.4f}'})
+    
+    return losses

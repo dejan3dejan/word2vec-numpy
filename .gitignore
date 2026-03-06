@@ -20,6 +20,7 @@ data/*.txt
 data/*.zip
 data/text8
 data/wikitext-103/
+data/wiki.train.tokens
 
 # Keep sample data
 !data/corpus.txt

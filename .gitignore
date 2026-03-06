@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data files (large)
+data/*.txt
+data/*.zip
+data/text8
+data/wikitext-103/
+
+# Keep sample data
+!data/corpus.txt
+!data/*.md
+
+# Output files (trained models)
+output/*/embeddings.npy
+output/*/vocab.npz
+output/*/*.png
+
+# Keep directory structure
+!output/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

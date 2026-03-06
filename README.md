@@ -1,19 +1,16 @@
 # word2vec NumPy Implementation
 
-Pure NumPy implementation of word2vec skip-gram with negative sampling for JetBrains Research internship application.
+Pure NumPy implementation of word2vec skip-gram with negative sampling.
 
-## 🎯 Project Overview
+## Project Overview
 
 This project implements the word2vec algorithm from scratch using only NumPy, demonstrating deep understanding of:
 - **Backpropagation** (manual gradient derivation)
 - **Negative sampling** (computational efficiency optimization)
-- **Production ML engineering** (CLI, reproducibility, evaluation)
-
-**Key Achievement:** Complete skip-gram implementation with numerical gradient verification, trained on text8 corpus.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Core Components
 
@@ -28,7 +25,7 @@ word2vec-numpy/
 ├── evaluate.py           # Word analogy & similarity evaluation
 ├── visualize.py          # PCA visualization (pure NumPy)
 ├── notebooks/
-│   └── 01-skip-gram-from-scratch.ipynb  # Development prototype
+│   └── 01-skip-gram-from-scratch.ipynb  # Proof of Concept (gradient verification, initial experiments)
 └── docs/
     └── design-decisions.md
 ```
@@ -43,13 +40,13 @@ word2vec-numpy/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/word2vec-numpy.git
+git clone https://github.com/dejan3dejan(YOURUSERNAME)/word2vec-numpy.git
 cd word2vec-numpy
 
 # Create virtual environment
@@ -87,7 +84,7 @@ python visualize.py
 
 ---
 
-## 📊 Results
+## Results
 
 ### Training Configuration
 - **Corpus:** text8 (10% sample, ~1.7M words)
@@ -105,10 +102,10 @@ Reduction:    30.8%
 ```
 
 **Semantic Clusters:** (Average pairwise cosine similarity)
-- Countries: 0.77 ✅ Strong
-- Cities: 0.34 ⚠️ Moderate  
-- Colors: 0.51 ✅ Strong
-- Animals: 0.07 ❌ Weak
+- Countries: 0.77 Strong
+- Cities: 0.34 Moderate  
+- Colors: 0.51 Strong
+- Animals: 0.07 Weak
 
 **Sample Word Analogies:**
 ```
@@ -121,7 +118,7 @@ paris - france + berlin ≈ ?
 
 ---
 
-## 🔬 Technical Implementation
+## Technical Implementation
 
 ### 1. Negative Sampling
 
@@ -143,7 +140,7 @@ Numerical gradient checking confirms analytical gradients are mathematically cor
 ```python
 numerical_grad = (loss(θ+ε) - loss(θ-ε)) / (2ε)
 relative_error = |numerical - analytical| / (|numerical| + |analytical|)
-# All errors < 1e-5 ✅
+# All errors < 1e-5
 ```
 
 ### 3. Memory-Efficient Streaming
@@ -160,7 +157,7 @@ def stream_training_pairs(corpus, word_to_idx, window_size):
 
 ---
 
-## 📈 Design Decisions
+## Design Decisions
 
 ### Skip-gram vs CBOW
 **Choice:** Skip-gram  
@@ -185,7 +182,7 @@ def stream_training_pairs(corpus, word_to_idx, window_size):
 
 ---
 
-## ⚠️ Limitations & Future Work
+## Limitations & Future Work
 
 ### Current Limitations
 
@@ -223,7 +220,32 @@ def forward_pass_jit(...):
 
 ---
 
-## 🧪 Reproducibility
+## Development Process
+
+### Proof of Concept (Notebook)
+
+Initial development was done in `notebooks/01-skip-gram-from-scratch.ipynb`:
+- **Gradient verification:** Numerical vs analytical gradients (errors < 1e-5)
+- **Mini corpus experiments:** Tested on 7 sentences before scaling
+- **Loss convergence validation:** Confirmed training loop correctness
+- **Iterative debugging:** Frequency bias detection and fixes
+
+**Key insights from PoC:**
+- Softmax baseline: Loss 3.37 → 2.05 (1k sentences, 100 epochs)
+- Negative sampling: Loss 4.16 → 1.55 (better quality, 24% improvement)
+- Gradient check: All relative errors < 1e-7 
+
+### Production Refactoring
+
+After validating core algorithm, refactored into production structure:
+- Modular `src/` package (separation of concerns)
+- CLI with argparse (reproducibility)
+- Streaming data pipeline (memory efficiency)
+- Comprehensive evaluation suite
+
+---
+
+## Reproducibility
 
 ### Random Seed Control
 ```python
@@ -238,47 +260,29 @@ tqdm==4.65.0
 ```
 
 ### Hardware
-- CPU: Intel i7 / AMD Ryzen 5 (or equivalent)
-- RAM: 8GB minimum
+- CPU: AMD Ryzen 7 5000
+- RAM: 16GB
 - Storage: 500MB for corpus + outputs
 
 ---
 
-## 📚 References
+## References
 
 **Original Papers:**
 - Mikolov et al. (2013). "Efficient Estimation of Word Representations in Vector Space"
 - Mikolov et al. (2013). "Distributed Representations of Words and Phrases and their Compositionality"
 
-**Implementation Inspiration:**
-- Gensim word2vec (C implementation)
-- Andrej Karpathy's "Software 2.0" philosophy
-- Andrew Ng's Deep Learning Specialization
-
 ---
 
-## 🤝 Acknowledgments
-
-Developed as part of JetBrains Research Deep Learning internship application (March 2026).
-
-**Learning Resources:**
-- Andrew Ng's ML Specialization (Coursera)
-- Mikolov's original word2vec papers
-- Stanford CS224N (NLP with Deep Learning)
-
----
-
-## 📄 License
+## License
 
 MIT License - See LICENSE file for details.
 
 ---
 
-## 👤 Author
+## Author
 
 **Dejan Žegarac**  
-Information Management Student, FTN  
+Engineering Management Student, FTN University of Novi Sad 
 - GitHub: [@dejan3dejan](https://github.com/dejan3dejan)
-- Email: [your.email@example.com]
-
-**Contact for questions or collaboration opportunities.**
+- Email: [dejan.zegarac0@gmail.com]
